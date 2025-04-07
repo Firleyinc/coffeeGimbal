@@ -1,5 +1,7 @@
 # coffeeGimbal
 
+![ccc overview](https://github.com/user-attachments/assets/990dcdd5-9990-4b04-be5f-73600949209d)
+
 Projekt zaliczeniowy z przedmiotu Teoria Sterowania w Robotyce (II stopień, AiR).
 Ideą jest stworzenie urządzenia stabilizującego ruchy płynu wewnątrz kubka, przeciwdziałającego jego wylewaniu się przy zmianach położenia w płaszczyźnie poziomej (X-Y) i orientacji.
 
