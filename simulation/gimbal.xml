@@ -19,7 +19,7 @@
 
     <asset>
         <mesh name="mug_segment_mesh" file="mesh/mug_segment.stl"/>
-        <mesh name="bottom_segment_mesh" file="mesh/bottom_segment.stl"/>
+        <mesh name="bottom_segment_mesh" file="mesh/bottom_segment_1mm.stl"/>
         <mesh name="x_arm_mesh" file="mesh/x_arm.stl"/>
         <mesh name="y_arm_mesh" file="mesh/y_arm.stl"/>
     </asset>
@@ -63,7 +63,7 @@
             </body>
         </body>
 
-          <body name="ball" pos="0 0 0.3">
+          <body name="ball" pos="0 0 0.05">
                 <joint type="free" damping="0.0001" />
                 <geom type="sphere" size="0.01" rgba="1 0 0 1" mass="0.05" />
 <!--                      solref="-1000 0"/>-->
