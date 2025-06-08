@@ -7,38 +7,32 @@ BUF_SIZE = 1000  # samples
 
 class QtGraph:
     def __init__(self, queue):
-        self.app = None
-        self.plot = None
-        self.window = None
         self.queue = queue
 
+        self.plotWidget = None
+        self.plot = None
+        
         self.buffer_size = BUF_SIZE
         self.t_data = []
         self.x_data = []
 
-        self.timer = None
-
     def init_ui(self):
-        self.app = QtWidgets.QApplication([])
-        self.window = QtWidgets.QMainWindow()
-        self.window.setWindowTitle("Plots")
+        self.plotWidget = pg.PlotWidget()
+        self.plotWidget.setWindowTitle("Plots")
 
-        graph_widget = pg.PlotWidget()
-        self.window.setCentralWidget(graph_widget)
+        self.plot = self.plotWidget.plot([], [], pen=pg.mkPen('b', width=2))
 
-        self.plot = graph_widget.plot([], [], pen=pg.mkPen('b', width=2))
-
+        self.plotWidget.show()
 
     def main(self):
+        app = QtWidgets.QApplication([])
         self.init_ui()
 
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.update_plots)
-        self.timer.start(UPDATE_PERIOD)  # 10Hz
+        timer = QtCore.QTimer()
+        timer.timeout.connect(self.update_plots)
+        timer.start(UPDATE_PERIOD)  # 10Hz
 
-
-        self.window.show()
-        self.app.exec()
+        app.exec()
 
 
     def update_plots(self):
@@ -53,4 +47,8 @@ class QtGraph:
 
 
         self.plot.setData(self.t_data, self.x_data)
-        self.plot.setYRange(-0.2, 0.2)
+
+
+if __name__ == '__main__':
+    qt = QtGraph(Queue())
+    qt.main()
