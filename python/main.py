@@ -6,15 +6,16 @@ import mujoco_interface
 import controller
 from qtgraph_interface import QtGraph
 
-MODEL_PATH = '../simulation/gimbal_simplified.xml'
+MODEL_PATH = '../simulation/gimbal_simplified.xml'  # ścieżka do modelu MuJoCo
 TP = 0.001
+PLOT_TP = 0.1   # okres dodawania sampli do plotu
 
 class Gimbal:
-    def __init__(self):
+    def __init__(self, queue):
 
         self.sim = mujoco_interface.MujocoSimulator(MODEL_PATH)
         self.x_control = controller.Controller()
-        self.t = 0.
+        self.queue = queue
 
 
     def main(self, queue):
@@ -22,6 +23,7 @@ class Gimbal:
             return (var - lastVar) / dt
 
         a_x_last = a_y_last = 0.
+        t = t_last = 0.
 
         self.sim.start()
         while self.sim.is_running():
@@ -32,9 +34,13 @@ class Gimbal:
             [a_x_dot, a_y_dot] = integrate(np.array([a_x, a_y]), np.array([a_x_last, a_y_last]), TP)  # zrywy
             a_x_last, a_y_last = a_x, a_y
 
-            queue.put((self.t, s_x))
+            if t - t_last > PLOT_TP:
+                self.queue.put((t, s_x))
+                t_last = t
+
             self.sim.step()
-            self.t += TP
+            t += TP
+
 
 
 
@@ -45,7 +51,7 @@ class Gimbal:
 if __name__ == '__main__':
     q = Queue()
 
-    gimbal = Gimbal()
+    gimbal = Gimbal(q)
     plotter = QtGraph(q)
 
     procGimbal = Process(target=gimbal.main, args=(q,))
