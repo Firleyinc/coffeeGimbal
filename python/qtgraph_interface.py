@@ -1,11 +1,10 @@
 from queue import Queue
+from PyQt6.QtWidgets import QVBoxLayout, QCheckBox, QLabel
 from PyQt6 import QtWidgets, QtCore
 import pyqtgraph as pg
 import numpy as np
 from dataclasses import dataclass, field
 from typing import Any, List
-
-from pyqtgraph import plots
 
 UPDATE_PERIOD = 20     # ms
 BUF_SIZE = 300  # samples
@@ -35,10 +34,12 @@ class Curve:
 
 
 class QtGraph:
-    def __init__(self, queue):
-        self.queue = queue
+    def __init__(self, sim2ui_queue, ui2sim_queue):
+        self.sim2ui_queue = sim2ui_queue
+        self.ui2sim_queue = ui2sim_queue
 
         self.window = None
+        self.checkboxes = []
 
         self.curves = {
             's_x': Curve(yRangeMax=0.2),
@@ -52,23 +53,36 @@ class QtGraph:
 
     def init_ui(self):
         def create_plot(title, leftLabel, bottomLabel = 't[s]'):
-            plot = self.window.addPlot(title=title)
+            plot = plotLayout.addPlot(title=title)
             plot.setLabel('left', leftLabel)
             plot.setLabel('bottom', bottomLabel)
             return plot
 
-        self.window = pg.GraphicsLayoutWidget(title="Plots")
+        self.window = QtWidgets.QWidget()
+        mainLayout = QtWidgets.QVBoxLayout(self.window)
+
+        plotLayout = pg.GraphicsLayoutWidget()
+        checkboxLayout = QtWidgets.QHBoxLayout()
+
+        self.checkboxes.append(QtWidgets.QCheckBox("Sine generator"))
+        self.checkboxes[0].stateChanged.connect(self.update_checkbox)
+
+        for checkbox in self.checkboxes:
+            checkboxLayout.addWidget(checkbox)
 
         plot_s = create_plot("Displacement", 's[m]')
-        self.window.nextRow()
+        plotLayout.nextRow()
         plot_a = create_plot("Acceleration", 'a[m/s^2]')
-        self.window.nextRow()
+        plotLayout.nextRow()
         # plot_a_dot = create_plot("Jerk", 'a_dot[m/s^3]')
 
         self.curves['s_y'].create_curve(plot_s)
         self.curves['s_x'].create_curve(plot_s)
         self.curves['a_y'].create_curve(plot_a)
         self.curves['a_x'].create_curve(plot_a)
+
+        mainLayout.addLayout(checkboxLayout)
+        mainLayout.addWidget(plotLayout)
 
         self.window.show()
 
@@ -84,8 +98,8 @@ class QtGraph:
 
 
     def update_plots(self):
-        while not self.queue.empty():
-            t, x = self.queue.get()
+        while not self.sim2ui_queue.empty():
+            t, x = self.sim2ui_queue.get()
             self.t_data.append(t)
             for name in self.curves:
                 self.curves[name].data.append(x[name])
@@ -95,6 +109,9 @@ class QtGraph:
         for name in self.curves:
             self.curves[name].clip_horizon(BUF_SIZE)
             self.curves[name].set_data(self.t_data)
+
+    def update_checkbox(self, state):
+        self.ui2sim_queue.put({'checkbox': state})
 
 
 if __name__ == '__main__':
