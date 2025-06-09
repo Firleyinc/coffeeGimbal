@@ -23,6 +23,9 @@ class MujocoSimulator:
     def get_acc(self, name, objType=mujoco.mjtObj.mjOBJ_JOINT):
         return self.data.qacc[mujoco.mj_name2id(self.model, objType, name)]
 
+    def set_pos(self, name, value, objType=mujoco.mjtObj.mjOBJ_JOINT):
+        self.data.qpos[mujoco.mj_name2id(self.model, objType, name)] = value
+
 
 
     # def set_variable(self, name, value, objType=mujoco.mjtObj.mjOBJ_JOINT):
