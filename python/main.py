@@ -35,7 +35,7 @@ class Gimbal:
             a_x_last, a_y_last = a_x, a_y
 
             if t - t_last > PLOT_TP:
-                self.queue.put((t, s_x))
+                self.queue.put((t, np.array([s_x, s_y, a_x, a_y, a_x_dot, a_y_dot])))
                 t_last = t
 
             self.sim.step()
