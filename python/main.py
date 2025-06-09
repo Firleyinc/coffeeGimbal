@@ -11,7 +11,7 @@ from qtgraph_interface import QtGraph
 
 MODEL_PATH = '../simulation/gimbal_simplified.xml'  # ścieżka do modelu MuJoCo
 TP = 0.01
-PLOT_TP = 0.005   # okres dodawania sampli do plotu
+# PLOT_TP = 0.005   # okres dodawania sampli do plotu
 
 class Gimbal:
     def __init__(self, sim2ui_queue, ui2sim_queue):
@@ -21,54 +21,83 @@ class Gimbal:
 
         self.sim = mujoco_interface.MujocoSimulator(MODEL_PATH)
         self.x_control = controller.Controller()
-        self.x_traj = traj_gen.TrajGen(amplitude=0.2)
+        self.x_traj = traj_gen.TrajGen(amplitude=1.57, freq=0.5)
 
         self.enable_traj_gen = False
 
-    def main(self):
-        def integrate(var, lastVar, dt):
-            return (var - lastVar) / dt
+        self.checkboxes = {}
+        self.inputParameters = {}
+        self.outputParameters = {}
 
-        a_x_last = a_y_last = 0.
-        t_last = 0.
+    def main(self):
 
         self.sim.start()
         while self.sim.is_running():
-            startTime = time.time()
+            stepStartTime = time.time()
+            self.outputParameters.clear()
 
-            varNames = ['move_x', 'move_y', 'rot_x', 'rot_y']
-            s_x, s_y, theta_x, theta_y = [self.sim.get_pos(name) for name in varNames]  # przemieszczenia
-            a_x, a_y = [self.sim.get_acc(name) for name in varNames[:2]]  # przyspieszenia
-            [a_x_dot, a_y_dot] = integrate(np.array([a_x, a_y]), np.array([a_x_last, a_y_last]), TP)  # zrywy
-            a_x_last, a_y_last = a_x, a_y
+            self.get_sim_params()
 
-            if self.t - t_last > PLOT_TP:
-                self.sim2ui_queue.put((self.t, {'s_x': s_x,
-                                    's_y': s_y,
-                                    'a_x': a_x,
-                                    'a_y': a_y,
-                                    'a_x_dot': a_x_dot,
-                                    'a_y_dot': a_y_dot}))
-                t_last = self.t
+            self.set_sim2ui_queue()
 
-            self.read_queue()
+            self.get_ui2sim_queue()
 
-            if self.enable_traj_gen:
-                s_x = self.x_traj.sine(self.t, freq = 0.2)
-                # s_y = self.x_traj.sine(self.t, phase=np.deg2rad(90))
+            self.traj_gen_step()
 
-            self.sim.set_pos(varNames[0], s_x)
-            self.sim.set_pos(varNames[1], s_y)
+            self.set_sim_params()
 
             self.sim.step()
-            time.sleep(max(0, TP - (time.time() - startTime)))
+
+            time.sleep(max(0, TP - (time.time() - stepStartTime)))
             self.t += TP
 
-    def read_queue(self):
+    def integrate(self, var, lastVar, dt):
+        return (var - lastVar) / dt
+
+    def get_sim_params(self, a_last=[(0, 0)]):
+        varNames = ['move_x', 'move_y', 'rot_x', 'rot_y']
+        s_x, s_y, theta_x, theta_y = [self.sim.get_pos(name) for name in varNames]  # przemieszczenia
+        a_x, a_y = [self.sim.get_acc(name) for name in varNames[:2]]  # przyspieszenia
+        [a_x_dot, a_y_dot] = self.integrate(np.array([a_x, a_y]), np.array(a_last[0]), TP)  # zrywy
+        a_last[0] = (a_x, a_y)
+
+        self.inputParameters = {'s_x': s_x,
+                           's_y': s_y,
+                           'theta_x': theta_x,
+                           'theta_y': theta_y,
+                           'a_x': a_x,
+                           'a_y': a_y,
+                           'a_x_dot': a_x_dot,
+                           'a_y_dot': a_y_dot}
+
+    def set_sim_params(self):
+        varNames = {'s_x': 'move_x',
+                    's_y': 'move_y',
+                    'theta_x': 'rot_x',
+                    'theta_y': 'rot_y'}
+        for name in self.outputParameters:
+            if name in varNames:
+                self.sim.set_pos(varNames[name], self.outputParameters[name])
+
+    def set_sim2ui_queue(self): # , t_last=[0]):
+        # if self.t - t_last[0] > PLOT_TP:
+        self.sim2ui_queue.put((self.t, self.inputParameters))
+        # t_last[0] = self.t  # pseudo static
+
+    def get_ui2sim_queue(self):
         while not self.ui2sim_queue.empty():
             state = self.ui2sim_queue.get()
-            if 'checkbox' in state:
-                self.enable_traj_gen = True if state['checkbox'] > 0 else False
+            self.checkboxes.update(state)
+
+    def traj_gen_step(self):
+        if 'x_traj_gen' in self.checkboxes:
+            if self.checkboxes['x_traj_gen']:
+                self.outputParameters['s_x'] = self.x_traj.sine(self.t)
+            else:
+                self.x_traj.sync(self.t)
+            # s_y = self.x_traj.sine(self.t, phase=np.deg2rad(90))
+
+
 
 
 

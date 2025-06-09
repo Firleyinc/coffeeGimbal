@@ -6,7 +6,7 @@ import numpy as np
 from dataclasses import dataclass, field
 from typing import Any, List
 
-UPDATE_PERIOD = 20     # ms
+UPDATE_PERIOD = 10     # ms
 BUF_SIZE = 300  # samples
 
 @dataclass
@@ -44,8 +44,8 @@ class QtGraph:
         self.curves = {
             's_x': Curve(yRangeMax=0.2),
             's_y': Curve(yRangeMax=0.2, penColor='g'),
-            'a_x': Curve(),
-            'a_y': Curve(penColor='g'),
+            'a_x': Curve(yRangeMax=10.),
+            'a_y': Curve(yRangeMax=10., penColor='g'),
             # 'a_x_dot': Curve(yRangeMax=10)
         }
 
@@ -111,7 +111,7 @@ class QtGraph:
             self.curves[name].set_data(self.t_data)
 
     def update_checkbox(self, state):
-        self.ui2sim_queue.put({'checkbox': state})
+        self.ui2sim_queue.put({'x_traj_gen': state})
 
 
 if __name__ == '__main__':

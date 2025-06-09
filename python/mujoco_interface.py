@@ -24,7 +24,7 @@ class MujocoSimulator:
         return self.data.qacc[mujoco.mj_name2id(self.model, objType, name)]
 
     def set_pos(self, name, value, objType=mujoco.mjtObj.mjOBJ_JOINT):
-        self.data.qpos[mujoco.mj_name2id(self.model, objType, name)] = value
+        self.data.ctrl[mujoco.mj_name2id(self.model, objType, name)] = value
 
 
 
