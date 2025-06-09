@@ -2,60 +2,73 @@ from queue import Queue
 from PyQt6 import QtWidgets, QtCore
 import pyqtgraph as pg
 import numpy as np
+from dataclasses import dataclass, field
+from typing import Any, List
 
-UPDATE_PERIOD = 50     # ms
+from pyqtgraph import plots
+
+UPDATE_PERIOD = 20     # ms
 BUF_SIZE = 300  # samples
+
+@dataclass
+class Curve:
+    plot: Any = None
+    data: List[int] = field(default_factory=list)
+    penColor: str = 'r'
+    yRangeMin: float = None
+    yRangeMax: float = 1.
+
+    def create_curve(self, parent):
+        if self.yRangeMin is None:
+            self.yRangeMin = -self.yRangeMax
+        self.plot = parent.plot(pen=self.penColor)
+        parent.setYRange(self.yRangeMin, self.yRangeMax)
+
+    def set_data(self, time):
+        if self.plot is None:
+            return
+        self.plot.setData(time, self.data)
+
+    def clip_horizon(self, horizon):
+        self.data = self.data[-horizon:]
+
+
 
 class QtGraph:
     def __init__(self, queue):
         self.queue = queue
 
-        # self.plotLabels = ['displacement s[m]', 'acceleration a[m/s^2]']
         self.window = None
 
-        self.plots = None
-        self.plots2 = None
-        self.plots_a = None
+        self.curves = {
+            's_x': Curve(yRangeMax=0.2),
+            's_y': Curve(yRangeMax=0.2, penColor='g'),
+            'a_x': Curve(),
+            'a_y': Curve(penColor='g'),
+            # 'a_x_dot': Curve(yRangeMax=10)
+        }
 
-        self.curves = None
-        self.curves2 = None
-
-        self.data = np.empty((0, 6))
         self.t_data = []
 
-    # def init_ui(self):
-    #     self.plotWidgets = pg.PlotWidget()
-    #
-    #     self.plotWidgets.setWindowTitle("Plots")
-    #
-    #     self.plotWidgets.setLabel("bottom", "time t[s]")
-    #     self.plotWidgets.setLabel("left", "displacement s[m]")
-    #     self.plotWidgets.setYRange(-0.25, 0.25)
-    #
-    #     # self.plotWidgets_a.setLabel("bottom", "time t[s]")
-    #     # self.plotWidgets_a.setLabel("left", "acceleration a[m/s^2]")
-    #     # self.plotWidgets_a.setYRange(-0.25, 0.25)
-    #
-    #     self.plots = self.plotWidgets.plot([], [], pen=pg.mkPen('r', name='s_x'))
-    #     self.plots2 = self.plotWidgets.plot([], [], pen=pg.mkPen('g', name='s_y'))
-    #
-    #     self.plots_a = self.plotWidgets.plot([], [], pen=pg.mkPen('r', width=2))
-    #
-    #     self.plotWidgets.show()
-    #     self.plotWidgets_a.show()
-
     def init_ui(self):
+        def create_plot(title, leftLabel, bottomLabel = 't[s]'):
+            plot = self.window.addPlot(title=title)
+            plot.setLabel('left', leftLabel)
+            plot.setLabel('bottom', bottomLabel)
+            return plot
+
         self.window = pg.GraphicsLayoutWidget(title="Plots")
 
-        p1 = self.window.addPlot(title="Displacement")
+        plot_s = create_plot("Displacement", 's[m]')
         self.window.nextRow()
-        p2 = self.window.addPlot(title="Acceleration")
+        plot_a = create_plot("Acceleration", 'a[m/s^2]')
+        self.window.nextRow()
+        # plot_a_dot = create_plot("Jerk", 'a_dot[m/s^3]')
 
-        self.plots = p1.plot(pen='r')
-        self.plots_a = p2.plot(pen='r')
-
-        p1.setYRange(-0.25, 0.25)
-        p2.setYRange(-1, 1)
+        self.curves['s_y'].create_curve(plot_s)
+        self.curves['s_x'].create_curve(plot_s)
+        self.curves['a_y'].create_curve(plot_a)
+        self.curves['a_x'].create_curve(plot_a)
 
         self.window.show()
 
@@ -65,7 +78,7 @@ class QtGraph:
 
         timer = QtCore.QTimer()
         timer.timeout.connect(self.update_plots)
-        timer.start(UPDATE_PERIOD)  # 10Hz
+        timer.start(UPDATE_PERIOD)
 
         app.exec()
 
@@ -74,13 +87,14 @@ class QtGraph:
         while not self.queue.empty():
             t, x = self.queue.get()
             self.t_data.append(t)
-            self.data = np.vstack([self.data, x])
+            for name in self.curves:
+                self.curves[name].data.append(x[name])
 
         self.t_data = self.t_data[-BUF_SIZE:]
-        self.data = self.data[-BUF_SIZE:, :]
 
-        self.plots.setData(self.t_data, self.data[:, 0])
-        self.plots_a.setData(self.t_data, self.data[:, 2])
+        for name in self.curves:
+            self.curves[name].clip_horizon(BUF_SIZE)
+            self.curves[name].set_data(self.t_data)
 
 
 if __name__ == '__main__':

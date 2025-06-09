@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from multiprocessing import Process, Queue
 
@@ -18,7 +20,7 @@ class Gimbal:
         self.queue = queue
 
 
-    def main(self, queue):
+    def main(self):
         def integrate(var, lastVar, dt):
             return (var - lastVar) / dt
 
@@ -35,7 +37,12 @@ class Gimbal:
             a_x_last, a_y_last = a_x, a_y
 
             if t - t_last > PLOT_TP:
-                self.queue.put((t, np.array([s_x, s_y, a_x, a_y, a_x_dot, a_y_dot])))
+                self.queue.put((t, {'s_x': s_x,
+                                    's_y': s_y,
+                                    'a_x': a_x,
+                                    'a_y': a_y,
+                                    'a_x_dot': a_x_dot,
+                                    'a_y_dot': a_y_dot}))
                 t_last = t
 
             self.sim.step()
@@ -54,11 +61,17 @@ if __name__ == '__main__':
     gimbal = Gimbal(q)
     plotter = QtGraph(q)
 
-    procGimbal = Process(target=gimbal.main, args=(q,))
+    procGimbal = Process(target=gimbal.main)
     procPlotter = Process(target=plotter.main)
 
     procGimbal.start()
     procPlotter.start()
+
+    while procGimbal.is_alive() and procPlotter.is_alive():
+        time.sleep(0.1)
+
+    procGimbal.terminate()
+    procPlotter.terminate()
 
     procGimbal.join()
     procPlotter.join()
