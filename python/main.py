@@ -21,7 +21,7 @@ class Gimbal:
 
         self.sim = mujoco_interface.MujocoSimulator(MODEL_PATH)
         self.x_control = controller.Controller()
-        self.x_traj = traj_gen.TrajGen(amplitude=1.57, freq=0.5)
+        self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.5)
 
         self.enable_traj_gen = False
 
@@ -39,10 +39,10 @@ class Gimbal:
             self.get_sim_params()
 
             self.set_sim2ui_queue()
-
             self.get_ui2sim_queue()
 
             self.traj_gen_step()
+            # self.outputParameters.update(self.x_control.step(self.inputParameters))
 
             self.set_sim_params()
 
@@ -92,7 +92,7 @@ class Gimbal:
     def traj_gen_step(self):
         if 'x_traj_gen' in self.checkboxes:
             if self.checkboxes['x_traj_gen']:
-                self.outputParameters['s_x'] = self.x_traj.sine(self.t)
+                self.outputParameters['theta_x'] = self.x_traj.sine(self.t)
             else:
                 self.x_traj.sync(self.t)
             # s_y = self.x_traj.sine(self.t, phase=np.deg2rad(90))
