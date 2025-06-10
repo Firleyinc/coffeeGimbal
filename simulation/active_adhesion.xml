@@ -1,0 +1,76 @@
+<mujoco model="Active adhesion example">
+  <!--
+    Adding some fluid viscosity to prevent the hanging sphere from jiggling too much.
+  -->
+  <option viscosity="1"/>
+
+  <size memory="10M"/>
+
+  <visual>
+    <headlight diffuse=".2 .2 .2"/>
+  </visual>
+
+  <default>
+    <joint damping="100"/>
+    <geom type="box" friction=".5"/>
+
+      <!--
+        Geoms in the active_adhesion class are "inflated" with a margin of 1cm, but contacts are
+        activated only at a depth gap of 1cm, leading to a layer of inactive contacts at a 1cm
+        distance from the surface. However the contacts can be used by the adhesion actuator.
+      -->
+
+
+  </default>
+
+  <worldbody>
+    <light pos="0.4 -.15 .6" dir="-1 .5 -1" diffuse=".7 .7 .7"/>
+    <light pos="-.4 -.15 .6" dir="1 .5 -1" diffuse=".7 .7 .7"/>
+
+    <body name="two crates">
+      <joint name="conveyor" type="hinge" axis="0 1 0"/>
+      <geom size=".2 .1 .01" pos="0 0 -.01"/>
+      <geom size=".01 .08 .031" pos="-.19 0 .03" />
+      <geom size=".01 .08 .031" pos="0  0 .03" />
+      <geom size=".01 .08 .031" pos="0.19 0 .03" />
+      <geom size="0.2 .01 .031" pos="0 -.09 .03" />
+      <geom size="0.2 .01 .031" pos="0 0.09 .03" />
+    </body>
+
+
+    <body name="sphere" pos=".1 0 .2" >
+      <freejoint/>
+      <!--
+        The composite balls in the crate have only 3 linear DoFs with condim=1, effectively
+        frictionless point particles. In order to make them stick to the sphere we give the sphere
+        priority 2, to force condim=3.
+
+        Also note the sphere has a margin+gap of 3cm as opposed to the 1cm of the arm box.
+      -->
+      <geom type="sphere" size=".02"  margin=".03" gap=".03"/>
+    </body>
+
+
+<!--          <body pos=".06 -.04 .05">-->
+<!--            <joint type="slide" axis="1 0 0"/>-->
+<!--            <joint type="slide" axis="0 1 0"/>-->
+<!--            <joint type="slide" axis="0 0 1"/>-->
+<!--            <geom type="sphere" size=".012" rgba=".5 .8 .5 1" solref=".005 1" condim="1"/>-->
+<!--          </body>-->
+
+  </worldbody>
+
+
+  <!--
+    By using divisor=3 in the pullies we increase the distance by which the hanging sphere moves
+    relative to the motion of the winch arm. One should imagine a double spindle with two radii that
+    creates a ratio of 1.5 between the motion of tendon before the pullies and after the pullies.
+    (1.5 rather than 3 because the tendon has 2 branches and the length is split between them)
+  -->
+
+  <actuator>
+    <position name="conveyor" joint="conveyor" ctrlrange="-1.7 1.7" ctrllimited="true" kp="1400"/>
+  </actuator>
+
+
+</mujoco>
