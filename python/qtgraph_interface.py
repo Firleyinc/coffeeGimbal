@@ -5,6 +5,7 @@ import pyqtgraph as pg
 import numpy as np
 from dataclasses import dataclass, field
 from typing import Any, List
+from functools import partial
 
 UPDATE_PERIOD = 10     # ms
 BUF_SIZE = 300  # samples
@@ -69,8 +70,12 @@ class QtGraph:
         plotLayout = pg.GraphicsLayoutWidget()
         checkboxLayout = QtWidgets.QHBoxLayout()
 
-        self.checkboxes.append(QtWidgets.QCheckBox("Sine generator"))
-        self.checkboxes[0].stateChanged.connect(self.update_checkbox)
+        self.checkboxes.append(QtWidgets.QCheckBox("sine_generator"))
+        self.checkboxes.append(QtWidgets.QCheckBox("controllers"))
+        self.checkboxes[1].setChecked(True)
+
+        for cb in self.checkboxes:
+            cb.stateChanged.connect(partial(self.update_checkbox, name=cb.text()))
 
         for checkbox in self.checkboxes:
             checkboxLayout.addWidget(checkbox)
@@ -123,8 +128,9 @@ class QtGraph:
             self.curves[name].clip_horizon(BUF_SIZE)
             self.curves[name].set_data(self.t_data)
 
-    def update_checkbox(self, state):
-        self.ui2sim_queue.put({'x_traj_gen': state})
+    def update_checkbox(self, state, name):
+        self.ui2sim_queue.put({name: state})
+
 
 
 if __name__ == '__main__':

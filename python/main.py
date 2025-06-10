@@ -54,7 +54,8 @@ class Gimbal:
 
             theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
 
-            self.outputParameters['theta_x'] = theta
+            if self.checkboxes.get('controllers'):
+                self.outputParameters['theta_x'] = theta
 
             # przesłanie wektora sterowań do symulatora
             self.set_sim_params()
@@ -107,8 +108,7 @@ class Gimbal:
             self.checkboxes.update(state)
 
     def traj_gen_step(self):
-        if 'x_traj_gen' in self.checkboxes:
-            if self.checkboxes['x_traj_gen']:
+            if self.checkboxes.get('sine_generator'):
                 self.outputParameters['s_x'] = self.x_traj.sine(self.t)
             else:
                 self.x_traj.sync(self.t)
