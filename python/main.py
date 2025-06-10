@@ -10,8 +10,8 @@ import traj_gen
 from qtgraph_interface import QtGraph
 
 MODEL_PATH = '../simulation/gimbal_simplified.xml'  # ścieżka do modelu MuJoCo
-TP = 0.01
-# PLOT_TP = 0.005   # okres dodawania sampli do plotu
+TP = 0.002
+PLOT_TP = 0.01   # okres dodawania sampli do plotu
 
 class Gimbal:
     def __init__(self, sim2ui_queue, ui2sim_queue):
@@ -20,7 +20,7 @@ class Gimbal:
         self.t = 0.
 
         self.sim = mujoco_interface.MujocoSimulator(MODEL_PATH)
-        self.x_control = controller.Controller()
+        self.x_control = controller.Controller(TP)
         self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.5)
 
         self.enable_traj_gen = False
@@ -31,34 +31,51 @@ class Gimbal:
 
     def main(self):
 
+        theta_prev = 0.
+
         self.sim.start()
         while self.sim.is_running():
+            # przygotowanie kroku symulacji
             stepStartTime = time.time()
             self.outputParameters.clear()
 
+            # pobranie wektora parametrów z ostatniego kroku symylatora
             self.get_sim_params()
 
+            # wymiana danych pomiędzy symulatorem, a procesem od generowania wykresów
             self.set_sim2ui_queue()
             self.get_ui2sim_queue()
 
+            #krok generatora trajektorii (o ile jest włączony)
             self.traj_gen_step()
-            # self.outputParameters.update(self.x_control.step(self.inputParameters))
 
+            # Tutaj znajduje się implementacja kontrolera. Wektor parametrów wejściowych jest w self.inputParameters, a wyjścia
+            # należy zapisywać do self.outputParameters. Oba z tych obiektów są słownikami.
+
+            theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
+
+            self.outputParameters['theta_x'] = theta
+
+            # przesłanie wektora sterowań do symulatora
             self.set_sim_params()
 
+            # krok symulacji MuJoCo
             self.sim.step()
 
+            # kontrola czasu trwania kroku TP
             time.sleep(max(0, TP - (time.time() - stepStartTime)))
             self.t += TP
 
-    def integrate(self, var, lastVar, dt):
+    def derive(self, var, lastVar, dt):
         return (var - lastVar) / dt
+
+
 
     def get_sim_params(self, a_last=[(0, 0)]):
         varNames = ['move_x', 'move_y', 'rot_x', 'rot_y']
         s_x, s_y, theta_x, theta_y = [self.sim.get_pos(name) for name in varNames]  # przemieszczenia
         a_x, a_y = [self.sim.get_acc(name) for name in varNames[:2]]  # przyspieszenia
-        [a_x_dot, a_y_dot] = self.integrate(np.array([a_x, a_y]), np.array(a_last[0]), TP)  # zrywy
+        [a_x_dot, a_y_dot] = self.derive(np.array([a_x, a_y]), np.array(a_last[0]), TP)  # zrywy
         a_last[0] = (a_x, a_y)
 
         self.inputParameters = {'s_x': s_x,
@@ -79,10 +96,10 @@ class Gimbal:
             if name in varNames:
                 self.sim.set_pos(varNames[name], self.outputParameters[name])
 
-    def set_sim2ui_queue(self): # , t_last=[0]):
-        # if self.t - t_last[0] > PLOT_TP:
-        self.sim2ui_queue.put((self.t, self.inputParameters))
-        # t_last[0] = self.t  # pseudo static
+    def set_sim2ui_queue(self, t_last=[0]):
+        if self.t - t_last[0] > PLOT_TP:
+            self.sim2ui_queue.put((self.t, self.inputParameters))
+            t_last[0] = self.t  # pseudo static
 
     def get_ui2sim_queue(self):
         while not self.ui2sim_queue.empty():
