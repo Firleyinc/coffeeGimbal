@@ -92,7 +92,7 @@ class Gimbal:
     def traj_gen_step(self):
         if 'x_traj_gen' in self.checkboxes:
             if self.checkboxes['x_traj_gen']:
-                self.outputParameters['theta_x'] = self.x_traj.sine(self.t)
+                self.outputParameters['s_x'] = self.x_traj.sine(self.t)
             else:
                 self.x_traj.sync(self.t)
             # s_y = self.x_traj.sine(self.t, phase=np.deg2rad(90))
