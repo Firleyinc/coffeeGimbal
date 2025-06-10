@@ -1,0 +1,72 @@
+<mujoco model="coffee-gimbal">
+
+    <compiler angle="radian" coordinate="local"/>
+
+    <option viscosity="1"/>
+    <size memory="10M"/>
+
+<!--    <option timestep="0.01"-->
+<!--    iterations="1"-->
+<!--    />-->
+
+    <default>
+        <joint damping="0.1" />
+        <geom friction=".5"/>
+<!--        <geom solimp="0.9 0.95 0.001 0.5 2" solref="0.02 10"/>-->
+    </default>
+
+
+    <worldbody>
+        <light pos="0 -0.25 1"/>
+        <geom type="plane" size="1 1 .01" pos="0 0 -.05"/>
+
+<!--        <body name="y_arm" pos="0 0 0">-->
+<!--            <joint name="move_x" type="slide" axis="1 0 0"/>-->
+<!--            <joint name="move_y" type="slide" axis="0 1 0"/>-->
+
+<!--            <geom type="mesh" mesh="y_arm_mesh"-->
+<!--                  rgba="0.32 0.87 0.16 1"-->
+<!--                  contype="0"-->
+<!--                  conaffinity="0"-->
+<!--            />-->
+
+<!--            <body name="x_arm" pos="0 0 0">-->
+<!--                <joint name="rot_y" type="hinge" axis="1 0 0" pos="0 0 0.071"/>-->
+
+<!--                <geom type="mesh" mesh="x_arm_mesh"-->
+<!--                    rgba="0.87 0.32 0.16 1"-->
+<!--                    contype="0"-->
+<!--                    conaffinity="0"-->
+<!--                />-->
+
+                 <body name="mug_bottom" pos="0 0 0.066">
+                    <joint name="rot_x" type="hinge" axis="0 1 0" pos="0 0 0" />
+
+<!--                     <replicate count="18" euler="0 0 0.349">-->
+<!--                         <geom type="mesh" mesh="bottom_segment_mesh"-->
+<!--                          rgba="0.92 0.92 0.92 1"/>-->
+<!--                     </replicate>-->
+                     <geom type="box" size="0.03 0.03 0.01"/>
+                </body>
+<!--            </body>-->
+<!--        </body>-->
+
+        <body name="ball" pos="0 0 0.1">
+        <!--                <joint type="free" damping="0.0001" />-->
+            <freejoint/>
+            <geom type="sphere" size="0.01" rgba="1 0 0 1" margin="0.01" gap=".01"/>
+        <!--                      solref="-1000 0"/>-->
+        </body>
+
+
+    </worldbody>
+
+    <actuator>
+<!--        <position name="move_x" joint="move_x" kp="50" ctrlrange="-.2 .2"/>-->
+<!--        <position name="move_y" joint="move_y" kp="50" ctrlrange="-.2 .2"/>-->
+        <position name="rot_x" joint="rot_x" kp="10" timeconst="0.01" ctrlrange="-1.57 1.57"/>
+<!--        <position name="rot_y" joint="rot_y" kp="50"/>-->
+    </actuator>
+
+
+</mujoco>
