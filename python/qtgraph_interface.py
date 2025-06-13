@@ -5,6 +5,7 @@ import pyqtgraph as pg
 import numpy as np
 from dataclasses import dataclass, field
 from typing import Any, List
+from functools import partial
 
 UPDATE_PERIOD = 10     # ms
 BUF_SIZE = 300  # samples
@@ -46,7 +47,10 @@ class QtGraph:
             's_y': Curve(yRangeMax=0.2, penColor='g'),
             'a_x': Curve(yRangeMax=10.),
             'a_y': Curve(yRangeMax=10., penColor='g'),
-            # 'a_x_dot': Curve(yRangeMax=10)
+            'a_x_dot': Curve(yRangeMax=10.),
+            'a_y_dot': Curve(yRangeMax=10., penColor='g'),
+            'theta_x': Curve(penColor='m'),
+            'theta_y': Curve(penColor='c'),
         }
 
         self.t_data = []
@@ -59,13 +63,19 @@ class QtGraph:
             return plot
 
         self.window = QtWidgets.QWidget()
+        self.window.setWindowTitle("Coffee Gimbal Diagnostics")
+        self.window.resize(1200, 800)
         mainLayout = QtWidgets.QVBoxLayout(self.window)
 
         plotLayout = pg.GraphicsLayoutWidget()
         checkboxLayout = QtWidgets.QHBoxLayout()
 
-        self.checkboxes.append(QtWidgets.QCheckBox("Sine generator"))
-        self.checkboxes[0].stateChanged.connect(self.update_checkbox)
+        self.checkboxes.append(QtWidgets.QCheckBox("sine_generator"))
+        self.checkboxes.append(QtWidgets.QCheckBox("controllers"))
+        self.checkboxes[1].setChecked(True)
+
+        for cb in self.checkboxes:
+            cb.stateChanged.connect(partial(self.update_checkbox, name=cb.text()))
 
         for checkbox in self.checkboxes:
             checkboxLayout.addWidget(checkbox)
@@ -74,12 +84,20 @@ class QtGraph:
         plotLayout.nextRow()
         plot_a = create_plot("Acceleration", 'a[m/s^2]')
         plotLayout.nextRow()
-        # plot_a_dot = create_plot("Jerk", 'a_dot[m/s^3]')
+        plot_a_dot = create_plot("Jerk", 'a_dot[m/s^3]')
+        plotLayout.nextRow()
+        plot_theta = create_plot("Mug rotation", 'theta[rad]')
+        plotLayout.nextRow()
+
 
         self.curves['s_y'].create_curve(plot_s)
         self.curves['s_x'].create_curve(plot_s)
         self.curves['a_y'].create_curve(plot_a)
         self.curves['a_x'].create_curve(plot_a)
+        self.curves['a_y_dot'].create_curve(plot_a_dot)
+        self.curves['a_x_dot'].create_curve(plot_a_dot)
+        self.curves['theta_x'].create_curve(plot_theta)
+        self.curves['theta_y'].create_curve(plot_theta)
 
         mainLayout.addLayout(checkboxLayout)
         mainLayout.addWidget(plotLayout)
@@ -110,8 +128,9 @@ class QtGraph:
             self.curves[name].clip_horizon(BUF_SIZE)
             self.curves[name].set_data(self.t_data)
 
-    def update_checkbox(self, state):
-        self.ui2sim_queue.put({'x_traj_gen': state})
+    def update_checkbox(self, state, name):
+        self.ui2sim_queue.put({name: state})
+
 
 
 if __name__ == '__main__':
