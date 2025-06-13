@@ -3,6 +3,7 @@ import time
 import numpy as np
 from multiprocessing import Process, Queue
 import mujoco
+import os
 
 import mujoco_interface
 import controller
@@ -21,7 +22,8 @@ class Gimbal:
         self.ui2sim_queue = ui2sim_queue
         self.t = 0.
 
-        self.sim = mujoco_interface.MujocoSimulator(MODEL_PATH)
+        cwd = os.path.dirname(os.path.abspath(__file__))
+        self.sim = mujoco_interface.MujocoSimulator(os.path.join(cwd, MODEL_PATH))
         self.x_control = controller.Controller(TP)
         self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.5)
 
