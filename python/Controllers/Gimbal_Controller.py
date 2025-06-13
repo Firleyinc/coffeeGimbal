@@ -1,6 +1,6 @@
 import numpy as np
 from Controllers.PID import PID_Controller
-from utils.calculate_inertia import compute_J
+from Controllers.utils.calculate_inertia import compute_J
 
 # Gimbal Plant: outputs acceleration
 class GimbalPlant:

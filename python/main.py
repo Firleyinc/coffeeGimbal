@@ -9,7 +9,7 @@ import controller
 import traj_gen
 from qtgraph_interface import QtGraph
 
-from Gimbal_Controller import FullGimbalController
+from Controllers.Gimbal_Controller import FullGimbalController
 
 MODEL_PATH = '../simulation/gimbal_simplified.xml'  # ścieżka do modelu MuJoCo
 TP = 0.002
@@ -31,6 +31,8 @@ class Gimbal:
         self.inputParameters = {}
         self.outputParameters = {}
 
+        self.checkboxes['controllers'] = 1  # workaround, żeby sterownik był domyślnie odpalony
+
     def main(self):
 
         theta_prev = 0.
@@ -51,7 +53,7 @@ class Gimbal:
             #krok generatora trajektorii (o ile jest włączony)
             self.traj_gen_step()
 
-            # Tutaj znajduje się implementacja kontrolera. Wektor parametrów wejściowych jest w self.inputParameters, a wyjścia
+            # Tutaj znaj    duje się implementacja kontrolera. Wektor parametrów wejściowych jest w self.inputParameters, a wyjścia
             # należy zapisywać do self.outputParameters. Oba z tych obiektów są słownikami.
 
             #theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
