@@ -60,7 +60,7 @@ class Gimbal:
 
             #theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
 
-            controller_params = (1.0, 0.5, 0.1)
+            controller_params = (0.3, 0.005, 0.05)
             acceleration = self.inputParameters['a_x']
             jerk = self.inputParameters['a_x_dot']
 

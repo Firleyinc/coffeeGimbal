@@ -2,7 +2,7 @@ import numpy as np
 from Controllers.PID import PID_Controller
 from Controllers.utils.calculate_inertia import compute_J
 
-# Gimbal Plant: outputs acceleration
+'''# Gimbal Plant: outputs acceleration
 class GimbalPlant:
     def __init__(self, g, J):
         self.g = g
@@ -14,11 +14,11 @@ def compute_feedforward(a_dot, J, g=9.81):
     return (J / g) * a_dot
 
 def compute_Plat(u_R, J, g=9.81):
-    return (g/J) * u_R
+    return (g/J) * u_R'''
 
 # Full control loop (no internal simulation)
 class FullGimbalController:
-    def __init__(self, controller_params, acceleration, jerk , dt=0.01):
+    def __init__(self, controller_params, acceleration, jerk , dt=0.002):
         Kp, Ki, Kd = controller_params
         self.pid = PID_Controller(Kp, Ki, Kd)
         self.a = acceleration
@@ -27,16 +27,22 @@ class FullGimbalController:
         self.dt = dt
         self.Y = 0
 
-    def trig_transform(self, a_ball):
+    def compute_feedforward(self,a_dot, J, g=9.81):
+        return (J / g) * a_dot
+
+    def compute_Plat(self,u_R, J, g=9.81):
+        return (g/J) * u_R
+
+    '''def trig_transform(self, a_ball):
         # Map acceleration to target tilt angle
-        return np.arcsin(np.clip(a_ball / 9.81, -1.0, 1.0))
+        return np.arcsin(np.clip(a_ball / 9.81, -1.0, 1.0))'''
     
     def update(self,g=9.81):
-        theta = self.trig_transform(self.a)
-        theta_dot = self.trig_transform(self.a_dot)
+        theta = np.arcsin(np.clip(self.a / 9.81, -1.0, 1.0))
+        theta_dot = self.a_dot / (9.81 * np.cos(theta))
 
         #===Feed Forward===
-        u_FF = compute_feedforward(theta_dot,self.J)
+        u_FF = self.compute_feedforward(theta_dot,self.J)
 
         #===Main Branch===
         error = theta - self.Y
@@ -45,7 +51,7 @@ class FullGimbalController:
 
         u_R = u_FF + u_PID
 
-        self.Y = compute_Plat(u_R,self.J)
+        self.Y = self.compute_Plat(u_R,self.J)
 
         return self.Y
 
