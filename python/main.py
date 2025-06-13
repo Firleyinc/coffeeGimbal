@@ -9,6 +9,8 @@ import controller
 import traj_gen
 from qtgraph_interface import QtGraph
 
+from Gimbal_Controller import FullGimbalController
+
 MODEL_PATH = '../simulation/gimbal_simplified.xml'  # ścieżka do modelu MuJoCo
 TP = 0.002
 PLOT_TP = 0.01   # okres dodawania sampli do plotu
@@ -52,7 +54,14 @@ class Gimbal:
             # Tutaj znajduje się implementacja kontrolera. Wektor parametrów wejściowych jest w self.inputParameters, a wyjścia
             # należy zapisywać do self.outputParameters. Oba z tych obiektów są słownikami.
 
-            theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
+            #theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
+
+            controller_params = (1.0, 0.5, 0.1)
+            acceleration = self.inputParameters['a_x']
+            jerk = self.inputParameters['a_x_dot']
+
+            self.x_control = FullGimbalController(controller_params=controller_params, acceleration=acceleration, jerk=jerk)
+            theta = self.x_control.update()
 
             if self.checkboxes.get('controllers'):
                 self.outputParameters['theta_x'] = theta
