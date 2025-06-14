@@ -35,6 +35,10 @@ class Gimbal:
 
         self.checkboxes['controllers'] = 1  # workaround, żeby sterownik był domyślnie odpalony
 
+        controller_params = (0.3, 0.005, 0.01)
+        # Initialize with dummy values, will be updated at runtime
+        self.x_control = FullGimbalController(controller_params=controller_params, acceleration=0.0, jerk=0.0)
+
     def main(self):
 
         theta_prev = 0.
@@ -60,11 +64,12 @@ class Gimbal:
 
             #theta = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
 
-            controller_params = (0.3, 0.005, 0.05)
             acceleration = self.inputParameters['a_x']
             jerk = self.inputParameters['a_x_dot']
 
-            self.x_control = FullGimbalController(controller_params=controller_params, acceleration=acceleration, jerk=jerk)
+            self.x_control.acceleration = acceleration
+            self.x_control.jerk = jerk
+
             theta = self.x_control.update()
 
             if self.checkboxes.get('controllers'):

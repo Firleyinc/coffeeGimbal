@@ -39,7 +39,7 @@ class FullGimbalController:
     
     def update(self,g=9.81):
         theta = np.arcsin(np.clip(self.a / 9.81, -1.0, 1.0))
-        theta_dot = self.a_dot / (9.81 * np.cos(theta))
+        theta_dot = self.a_dot / 9.81#(9.81 * np.cos(theta))
 
         #===Feed Forward===
         u_FF = self.compute_feedforward(theta_dot,self.J)
