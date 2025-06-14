@@ -8,7 +8,9 @@
 
     <default>
         <joint damping="0.1" />
-        <geom friction=".5"/>
+        <geom friction=".5"
+        contype="1"
+        conaffinity="1"/>
     </default>
 
     <asset>
@@ -52,7 +54,7 @@
             </body>
         </body>
 
-          <body name="ball" pos="0 0 0.175">
+          <body name="ball" pos="0 0 0.075">
                 <freejoint/>
                 <geom type="sphere" size="0.01" rgba="1 0 0 1" margin="0.02" gap=".02" mass="0.1"/>
 
