@@ -19,7 +19,7 @@ class Gimbal:
     def __init__(self, sim2ui_queue, ui2sim_queue):
         self.sim2ui_queue = sim2ui_queue
         self.ui2sim_queue = ui2sim_queue
-        self.t = 0.
+        self.t = 0
 
         cwd = os.path.dirname(os.path.abspath(__file__))
         self.sim = mujoco_interface.MujocoSimulator(os.path.join(cwd, MODEL_PATH))
@@ -34,7 +34,7 @@ class Gimbal:
 
         # Initialize controller with dummy acceleration and jerk
 
-        controller_params = (50.0, 5.0, 10.0)
+        controller_params = (50.0, 0.5, 1.5)
 
         self.get_sim_params()  # First get initial values
         initial_a_x = self.inputParameters['a_x']
@@ -55,7 +55,7 @@ class Gimbal:
         self.sim.start()
 
         acceleration = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
-        jerk = np.clip(self.inputParameters['a_x_dot'], -100, 100)  # Example limits
+        jerk = np.clip(self.inputParameters['a_x_dot'], -150, 150)  # Example limits
         
         self.x_control.acceleration = acceleration
         self.x_control.jerk = jerk
@@ -66,17 +66,18 @@ class Gimbal:
 
             self.get_sim_params()
             #print(f"DEBUG inputParameters: a_x={self.inputParameters['a_x']}, a_x_dot={self.inputParameters['a_x_dot']}")
+            
 
             self.set_sim2ui_queue()
             self.get_ui2sim_queue()
             self.traj_gen_step()
 
-            acceleration = self.inputParameters['a_x']
+            accel = self.inputParameters['a_x']
             jerk = self.inputParameters['a_x_dot']
 
             self.get_sim_params()
-            accel = self.inputParameters['a_x']
-            jerk = self.inputParameters['a_x_dot']
+            accel = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
+            jerk = np.clip(self.inputParameters['a_x_dot'], -100, 100)  # Example limits
             
             # Update controller inputs
             self.x_control.update_inputs(accel, jerk)
@@ -85,7 +86,7 @@ class Gimbal:
             # Update inputs to the controller
             self.x_control.acceleration = acceleration
             self.x_control.jerk = jerk
-            #print(f"[Controller2] a_x: {self.x_control.a_x}, a_x_dot: {self.x_control.a_x_dot}, theta: {self.x_control.theta}")
+            #print(f"[Controller2] a_x: {self.x_control.acceleration}, a_x_dot: {self.x_control.jerk}, theta: {self.x_control.theta}")
 
 
             theta = self.x_control.update()
