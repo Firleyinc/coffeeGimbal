@@ -32,7 +32,7 @@ class FullGimbalController:
         self.max_accel = 9.8 * 2  
         self.max_jerk = 150.0
         self.max_tilt = np.radians(90)  
-        self.max_tilt_rate = np.radians(500)  
+        self.max_tilt_rate = np.radians(400)  
 
         self.accel_filter = LowPassFilter(alpha=0.6, initial=acceleration)
         self.jerk_filter = LowPassFilter(alpha=0.3, initial=jerk)
@@ -42,7 +42,7 @@ class FullGimbalController:
         self.last_theta = 0.0
 
         self.velocity_estimate = 0.0
-        self.K_velocity = 6.7 # Zacznij np. od 1.0-2.0, potem zwiększaj/dobieraj
+        self.K_velocity = 6.5 # Zacznij np. od 1.0-2.0, potem zwiększaj/dobieraj
 
         self.update_inputs(acceleration, jerk)
 

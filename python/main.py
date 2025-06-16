@@ -24,7 +24,7 @@ class Gimbal:
         cwd = os.path.dirname(os.path.abspath(__file__))
         self.sim = mujoco_interface.MujocoSimulator(os.path.join(cwd, MODEL_PATH))
 
-        self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.5)
+        self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.4)
         self.enable_traj_gen = False
 
         self.checkboxes = {}
