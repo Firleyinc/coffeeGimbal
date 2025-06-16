@@ -1,0 +1,102 @@
+Sun Jun 15 15:40:43 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:40:47 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:42:52 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:42:54 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:45:09 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:45:11 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:08 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:47:12 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:13 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:13 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:13 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:13 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:47:31 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:51:42 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:52:49 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.2440.
+
+Sun Jun 15 15:52:51 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:52:52 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:55:34 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1220.
+
+Sun Jun 15 15:56:57 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1960.
+
+Sun Jun 15 15:57:00 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 15:57:01 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 16:01:38 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1960.
+
+Sun Jun 15 16:02:25 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1220.
+
+Sun Jun 15 16:04:45 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1220.
+
+Sun Jun 15 16:05:31 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1220.
+
+Sun Jun 15 16:08:01 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1180.
+
+Sun Jun 15 16:29:58 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0980.
+
+Sun Jun 15 16:30:01 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 16:32:33 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.1000.
+
+Sun Jun 15 16:32:38 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 22:29:53 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0680.
+
+Sun Jun 15 22:29:57 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 22:30:01 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0000.
+
+Sun Jun 15 22:30:21 2025
+WARNING: Nan, Inf or huge value in CTRL at ACTUATOR 2. The simulation is unstable. Time = 0.0680.
+

@@ -24,7 +24,7 @@ class Gimbal:
         cwd = os.path.dirname(os.path.abspath(__file__))
         self.sim = mujoco_interface.MujocoSimulator(os.path.join(cwd, MODEL_PATH))
 
-        self.x_traj = traj_gen.TrajGen(amplitude=0.2, freq=0.4)
+        self.x_traj = traj_gen.TrajGen(amplitude=0.15, freq=0.4)
         self.enable_traj_gen = False
 
         self.checkboxes = {}
@@ -34,7 +34,7 @@ class Gimbal:
 
         # Initialize controller with dummy acceleration and jerk
 
-        controller_params = (50.0, 0.5, 1.5)
+        controller_params = (20.0, 0.5, 1.5)
 
         self.get_sim_params()  # First get initial values
         initial_a_x = self.inputParameters['a_x']
@@ -54,8 +54,8 @@ class Gimbal:
     def main(self):
         self.sim.start()
 
-        acceleration = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
-        jerk = np.clip(self.inputParameters['a_x_dot'], -150, 150)  # Example limits
+        acceleration = self.inputParameters['a_x']#np.clip(self.inputParameters['a_x'], -9.8, 9.8)
+        jerk = self.inputParameters['a_x_dot']#np.clip(self.inputParameters['a_x_dot'], -200, 200)  # Example limits
         
         self.x_control.acceleration = acceleration
         self.x_control.jerk = jerk
@@ -72,12 +72,13 @@ class Gimbal:
             self.get_ui2sim_queue()
             self.traj_gen_step()
 
+
+            self.get_sim_params()
+            #accel = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
+            #jerk = np.clip(self.inputParameters['a_x_dot'], -100, 100)  # Example limits
             accel = self.inputParameters['a_x']
             jerk = self.inputParameters['a_x_dot']
 
-            self.get_sim_params()
-            accel = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
-            jerk = np.clip(self.inputParameters['a_x_dot'], -100, 100)  # Example limits
             
             # Update controller inputs
             self.x_control.update_inputs(accel, jerk)

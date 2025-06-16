@@ -32,7 +32,8 @@
             <geom type="mesh" mesh="y_arm_mesh"
                   rgba="0.32 0.87 0.16 1"
                   contype="0"
-                  conaffinity="0"/>
+                  conaffinity="0"
+                  mass="0.2"/>
 
             <body name="x_arm" pos="0 0 0">
                 <joint name="rot_y" type="hinge" axis="1 0 0" pos="0 0 0.071"/>
@@ -41,7 +42,7 @@
                       rgba="0.87 0.32 0.16 1"
                       contype="0"
                       conaffinity="0"
-/>
+                      mass="0.2"/>
 
                  <body name="mug_bottom" pos="0 0 0.066">
                     <joint name="rot_x" type="hinge" axis="0 1 0" pos="0 0 0.01"/>

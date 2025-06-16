@@ -58,9 +58,9 @@ class FullGimbalController:
     def compute_Plat(self, u_R, g=9.81):
         return (g / self.J) * u_R
 
-    def compute_feedforward(self, jerk, g=9.81):
+    def compute_feedforward(self, accel, g=9.81):
         # Klasyczna kompensacja przyspieszenia przez nachylenie
-        return np.arcsin(np.clip(jerk / g, -0.95, 0.95))
+        return np.arcsin(np.clip(self.accel / g, -0.95, 0.95))
 
 
     def sync_state(self, theta):
@@ -76,24 +76,22 @@ class FullGimbalController:
         self.velocity_estimate = self.velocity_filter.update(self.velocity_estimate)
 
         # Feedforward na bazie przyspieszenia
-        theta_ff = self.compute_feedforward(self.jerk, g)
+        theta_ff_acc = self.compute_feedforward(self.accel, g)
         # Feedforward na bazie prędkości (anticipatory term)
-
         velocity_term = -self.K_velocity * self.velocity_estimate
 
         # Sumaryczny sygnał referencyjny (theta, którą powinna mieć tacka)
-
-        theta_ref = np.arcsin(np.clip(self.accel / g, -0.95, 0.95)) + velocity_term
+        theta_ff_total = theta_ff_acc + velocity_term
 
         # Sterowanie PID (możesz wyłączyć P/I/D na testy, żeby zobaczyć tylko feedforward)
-        error = theta_ref - self.last_theta  # Our goal is to drive this to 0
+        error = self.accel - self.last_theta  # Our goal is to drive this to 0
 
         u_pid = self.pid.compute(error, self.dt)
 
-        u_ref = theta_ff + u_pid
+        u_ref = theta_ff_total + u_pid
 
         # Aktualizacja nachylenia
-        self.theta += self.compute_Plat(u_ref)
+        self.theta += u_ref
 
         # Limit prędkości zmiany kąta (ochrona)
         max_delta = self.max_tilt_rate * self.dt
@@ -102,7 +100,7 @@ class FullGimbalController:
 
         # ---- LOGGING ----
         print(f"[DBG] a_x={self.accel:.3f}, v_est={self.velocity_estimate:.3f}, "
-              f"theta_ff_acc={theta_ff:.3f}, v_term={velocity_term:.3f}, "
+              f"theta_ff_acc={theta_ff_acc:.3f}, v_term={velocity_term:.3f}, "
               f"theta_out={self.theta:.3f}")
 
         return self.theta
