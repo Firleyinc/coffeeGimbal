@@ -1,24 +1,41 @@
 import numpy as np
+from matplotlib.pyplot import thetagrids
+
+
+class LowPassFilter:
+    def __init__(self, alpha, initial=0.0):
+        self.alpha = alpha
+        self.value = initial
+
+    def step(self, new_value):
+        self.value = self.alpha * new_value + (1 - self.alpha) * self.value
+        return self.value
+
 class Controller:
     def __init__(self, TP):
         self.dt = TP
-        self.kp = 0.1
+        self.kp = 1.
         self.kd = 0
 
         self.last_a = 0.
         self.last_theta = 0.
 
+        self.a_lpf = LowPassFilter(alpha=0.2)
+
     def step(self, a, a_dot):
-        # sign = 1 if a > 0 else -1
+        # theta = a * 0.1
+        # a = self.a_lpf.step(a)
 
-        theta = a * self.kp
-
-        # theta *= sign
+        theta = -self.calc_netVect_angle(a, -9.81) * self.kp
 
         theta = self.rate_limiter(theta, self.last_theta, 1)
         self.last_theta = theta
 
         return theta
+
+    def calc_netVect_angle(self, a, g):
+        alfa = np.arctan(a / g)
+        return alfa
 
     def rate_limiter(self, x, x_last, max_rate):
         delta = x - x_last

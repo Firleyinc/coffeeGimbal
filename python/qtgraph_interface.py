@@ -70,9 +70,10 @@ class QtGraph:
         plotLayout = pg.GraphicsLayoutWidget()
         checkboxLayout = QtWidgets.QHBoxLayout()
 
-        self.checkboxes.append(QtWidgets.QCheckBox("sine_generator"))
+        self.checkboxes.append(QtWidgets.QCheckBox("x_sine_generator"))
+        self.checkboxes.append(QtWidgets.QCheckBox("y_sine_generator"))
         self.checkboxes.append(QtWidgets.QCheckBox("controllers"))
-        self.checkboxes[1].setChecked(True)
+        self.checkboxes[2].setChecked(True)
 
         for cb in self.checkboxes:
             cb.stateChanged.connect(partial(self.update_checkbox, name=cb.text()))

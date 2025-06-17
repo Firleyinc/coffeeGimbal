@@ -9,7 +9,7 @@ import controller
 import traj_gen
 from qtgraph_interface import QtGraph
 
-from Controllers.Gimbal_Controller import FullGimbalController
+from Controllers.Gimbal_Controller import FullGimbalController, LowPassFilter
 
 MODEL_PATH = '../simulation/gimbal_simplified.xml'
 TP = 0.002
@@ -24,41 +24,45 @@ class Gimbal:
         cwd = os.path.dirname(os.path.abspath(__file__))
         self.sim = mujoco_interface.MujocoSimulator(os.path.join(cwd, MODEL_PATH))
 
-        self.x_traj = traj_gen.TrajGen(amplitude=0.15, freq=0.4)
-        self.enable_traj_gen = False
+        self.x_traj = traj_gen.TrajGen(amplitude=0.15, freq=0.8)
+        self.y_traj = traj_gen.TrajGen(amplitude=0.15, freq=0.8)
+
+        self.x_control = controller.Controller(TP)
+        self.y_control = controller.Controller(TP)
 
         self.checkboxes = {}
         self.inputParameters = {}
         self.outputParameters = {}
         self.checkboxes['controllers'] = 1
+        self.lpf_a_x = controller.LowPassFilter(alpha=0.5)
 
         # Initialize controller with dummy acceleration and jerk
 
         controller_params = (20.0, 0.5, 1.5)
 
-        self.get_sim_params()  # First get initial values
-        initial_a_x = self.inputParameters['a_x']
-        initial_a_x_dot = self.inputParameters['a_x_dot']
-        self.x_control = FullGimbalController(
-            controller_params=controller_params,
-            acceleration=initial_a_x, 
-            jerk=initial_a_x_dot,
-            dt=TP
-        )
+        # self.get_sim_params()  # First get initial values
+        # initial_a_x = self.inputParameters['a_x']
+        # initial_a_x_dot = self.inputParameters['a_x_dot']
+        # self.x_control = FullGimbalController(
+        #     controller_params=controller_params,
+        #     acceleration=initial_a_x,
+        #     jerk=initial_a_x_dot,
+        #     dt=TP
+        # )
 
         # IMPORTANT: Get initial theta from simulator
-        self.get_sim_params()  # populate inputParameters
-        initial_theta_x = self.inputParameters['theta_x']
-        self.x_control.sync_state(initial_theta_x)
+        # self.get_sim_params()  # populate inputParameters
+        # initial_theta_x = self.inputParameters['theta_x']
+        # self.x_control.sync_state(initial_theta_x)
 
     def main(self):
         self.sim.start()
 
-        acceleration = self.inputParameters['a_x']#np.clip(self.inputParameters['a_x'], -9.8, 9.8)
-        jerk = self.inputParameters['a_x_dot']#np.clip(self.inputParameters['a_x_dot'], -200, 200)  # Example limits
+        # acceleration = self.inputParameters['a_x']#np.clip(self.inputParameters['a_x'], -9.8, 9.8)
+        # jerk = self.inputParameters['a_x_dot']#np.clip(self.inputParameters['a_x_dot'], -200, 200)  # Example limits
         
-        self.x_control.acceleration = acceleration
-        self.x_control.jerk = jerk
+        # self.x_control.acceleration = acceleration
+        # self.x_control.jerk = jerk
 
         while self.sim.is_running():
             stepStartTime = time.time()
@@ -66,34 +70,41 @@ class Gimbal:
 
             self.get_sim_params()
             #print(f"DEBUG inputParameters: a_x={self.inputParameters['a_x']}, a_x_dot={self.inputParameters['a_x_dot']}")
-            
+
+            #uwaga, lowpass!
+            # self.inputParameters['a_x'] = self.lpf_a_x.step(self.inputParameters['a_x'])
 
             self.set_sim2ui_queue()
             self.get_ui2sim_queue()
             self.traj_gen_step()
 
 
-            self.get_sim_params()
             #accel = np.clip(self.inputParameters['a_x'], -9.8, 9.8)
             #jerk = np.clip(self.inputParameters['a_x_dot'], -100, 100)  # Example limits
-            accel = self.inputParameters['a_x']
-            jerk = self.inputParameters['a_x_dot']
+            # accel = self.inputParameters['a_x']
+            # jerk = self.inputParameters['a_x_dot']
 
             
             # Update controller inputs
-            self.x_control.update_inputs(accel, jerk)
+            # self.x_control.update_inputs(accel, jerk)
 
 
             # Update inputs to the controller
-            self.x_control.acceleration = acceleration
-            self.x_control.jerk = jerk
+            # self.x_control.acceleration = acceleration
+            # self.x_control.jerk = jerk
             #print(f"[Controller2] a_x: {self.x_control.acceleration}, a_x_dot: {self.x_control.jerk}, theta: {self.x_control.theta}")
 
 
-            theta = self.x_control.update()
+            # theta = self.x_control.update()
+
+            theta_x = self.x_control.step(self.inputParameters['a_x'], self.inputParameters['a_x_dot'])
+            theta_y = -self.y_control.step(self.inputParameters['a_y'], self.inputParameters['a_y_dot'])
+
 
             if self.checkboxes.get('controllers'):
-                self.outputParameters['theta_x'] = theta
+                self.outputParameters['theta_x'] = theta_x
+                self.outputParameters['theta_y'] = theta_y
+
 
             self.set_sim_params()
             self.sim.step()
@@ -141,10 +152,14 @@ class Gimbal:
             self.checkboxes.update(state)
 
     def traj_gen_step(self):
-        if self.checkboxes.get('sine_generator'):
+        if self.checkboxes.get('x_sine_generator'):
             self.outputParameters['s_x'] = self.x_traj.sine(self.t)
         else:
             self.x_traj.sync(self.t)
+        if self.checkboxes.get('y_sine_generator'):
+            self.outputParameters['s_y'] = self.y_traj.sine(self.t)
+        else:
+            self.y_traj.sync(self.t)
             
 
 
