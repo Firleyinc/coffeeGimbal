@@ -25,4 +25,4 @@ Ideą jest stworzenie urządzenia stabilizującego ruchy płynu wewnątrz kubka,
 
 ## Opis rozwiązania
 
-![til](.gimball.gif)
+![til](https://github.com/Firleyinc/coffeeGimbal/blob/main/gimball.gif)
