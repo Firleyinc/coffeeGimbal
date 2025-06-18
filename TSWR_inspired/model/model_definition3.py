@@ -1,1 +1,0 @@
-#TODO GimbalModel3 zmienione m3 i r3
