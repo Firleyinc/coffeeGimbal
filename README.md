@@ -7,23 +7,22 @@ Ideą jest stworzenie urządzenia stabilizującego ruchy płynu wewnątrz kubka,
 
 ## W skład niniejszego projektu wchodzą dwie części - symulator i sterownik.
 
-1. Wewnątrz środowiska symulacyjnego ma zostać zaimplementowana mechanika urządzenia - wklęsłego talerza, zawieszonego na dwóch przegubach obrotowych, umożliwiających zadawanie dowolnego położenia w osi X i Y, w zakresie od -90 do +90 stopni. Obiektem do utrzymywania na talerzu będzie kula, swobodnie przemieszczająca się w przestrzeni symulatora - zadaniem sterownika jest wytworzenie takich sterowań, żeby w trakcie zmian położenia i orientacji układu globalnego, kula znajdowała się możliwie jak najbliżej środka talerza, a wektor sił wynikających z jej bezwładności, był skierowany wył osi -Z w układzie współrzędnych pojemnika. Docelowo kula może zostać zastąpiona dokładniejszym modelem, działającym zgodnie z zasadami dynamiki płynów, a talerz zastąpiony kubkiem, pod warunkiem rozszerzenia wektora stanów. Wybrane środowisko symulacyjne są przyspieszenie, oraz zryw kulki
-2. Celem jest zaimplementowanie sterownika mającego za zadanie talerzwać ruchy globalnego układu współrzędnych i minimalizować siły w kierunku promieniowym, działające na kulkę na talerzu. Sygnałami wejściowymi są przyspieszenie, oraz zryw kulki, natomiast wyjściowymi - położenia przegubów układu talerzącego talerz. Na potrzeby realizacji zadania, zakłada się, że siły w osiach Z nie występują i w związku z tym nie ma konieczności ich kompensowania - innymi słowy stabilizujemy talerz na umieszczony na statku, a nie w myśliwcu.
+1. Wewnątrz środowiska symulacyjnego ma zostać zaimplementowana mechanika urządzenia - wklęsłego talerza, zawieszonego na dwóch przegubach obrotowych, umożliwiających zadawanie dowolnego położenia w osi X i Y, w zakresie od -90 do +90 stopni. Obiektem do utrzymywania na talerzu będzie kula, swobodnie przemieszczająca się w przestrzeni symulatora - zadaniem sterownika jest wytworzenie takich sterowań, żeby w trakcie zmian położenia i orientacji układu globalnego, kula znajdowała się możliwie jak najbliżej środka talerza, a wektor sił wynikających z jej bezwładności, był skierowany wył osi -Z w układzie współrzędnych pojemnika. Docelowo kula może zostać zastąpiona dokładniejszym modelem, działającym zgodnie z zasadami dynamiki płynów, a talerz zastąpiony kubkiem, pod warunkiem rozszerzenia wektora stanów. 
+2. Celem pierwszego etapu jest zaimplementowanie środowiska symulacyjnego oraz sterownika mającego za zadanie minimalizować przemieszczenia kulki na "talerzu" (podstawie) względem jego lokalnego układu współrzędnych. Sygnałami wejściowymi są przyspieszenie oraz zryw talerza w płaszczyźnie X-Y, natomiast wyjściowymi - położenia kątowe theta talerza. Na potrzeby realizacji zadania, zakłada się, że przyspieszenie w osi Z układu globalnego nie zmienia się i w związku z tym nie ma konieczności jego kompensowania.
 
 ## Struktura projektu
 
-1. Model symulacji załadowywany do symulatora Mujoco znajduje się w pliku 'gimbal_simplified.xml' w katalogu /simulation. Definiuje on zarówno wizualizacje jak i model fizyczny gimballa.
+1. Wszelkie pliki modelu niezbędnego do symulacji znajdują się w folderze 'simulation' - są to bryły oraz plik szablonu MuJoCo gimbal_simplified.xml. Ten z kolei definiuje zarówno część graficzną wizualizacji, jak i parametry modelu dynamiki układu.
 
-2. Główny plik wykonywalny to 'main.py' w katalogu /python. Plik ten jest odpowiedzialny za:
-- główny skrypt uruchamiający symulator Mujoco
-- definicja generatora trajektorii sinusoidalnych używanych w testach układu
-- pozyskiwanie i wysyłanie parametrów symulacji
-- używanie zaimplementowanego regulatora do regulacji kąta wychylenia talerza
-- definicja okna zawierającego wykresy wartości (przemieszczenia, przyspieszenia, zrywu, wychylenia talerza); oraz checkboxy załączające odpowiednie fynkcjonalnosci sterownika i generatorów trajektorii
-- definicja zależności suwaków pozycyjnych w symulatorze Mujoco służących, jako kolejny sposób generowania trajektorii, ale tym razem wedle uznania użytkownika
+2. Pliki symulatora i regulatora znajdują się katalogu 'python'. Symulację uruchamia się z poziomu pliku main.py.
+- main.py: skrypt pętli głównej programu, podstawowe parametry konfiguracyjne, definicje obiektów;
+- traj_gen.py: klasa generatora trajektorii, służącego do opcjonalnego wytwarzania sygnałów wejściowych, np. na potrzeby oceny jakości regulacji;
+- controller.py: klasy implementujące pojedynczy regulator kompensujący przyspieszenia talerza jego wychyleniem;
+- mujoco_interface.py: klasy interfejsu Python <-> MuJoCo. Odpowiadają za sterowanie symulacją i dostarczają wektorów stanu i sterowań.
+- qtgraph_interface.py: klasy odpowiadające za rysowanie interfejsu GUI, przedstawiającego zmiany wybranych parametrów w czasie rzeczywistym, w formie wykresów. Do rysowania GUI wykorzystano bibliotekę PyQt6 oraz PyQtGraph.
+- requirements.txt: zawiera spis wymaganych bibliotek zewnętrznych. 
 
-3. Regulator znajduje się w pliku 'controller.py' w katalogu /python zaimplementowanym regulatorem jest regulator typu P, gdyż dawał nam on najlepsze wyniki.
 
 ## Opis rozwiązania
-Symulator Mujoco, definiując aktuatory implementuje do każdego z nich wewnętrzny regulator PID, do którego uzytkownik nie ma dostępu. W skutek testów mogliśmy zaobserwować, że regulator P jest w stanie współgrać z wewnętrznymi regulatorami symulatora Mujoco, tzn. regulatory nie zakłócają się na wzajem.
-Ważnym krokiem było także nadanie masy ramionom systemu Gimbal. Pozwoliło nam to nadać głównemu układowi pewien moment inercji, przez co ograniczyliśmy wpływ kuli na cału układ.
+
+![til](.gimball.gif)
